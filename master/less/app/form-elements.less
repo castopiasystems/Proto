@@ -41,7 +41,7 @@
     margin-right: 5px;
     text-align: center;
     &:before {
-      margin-left: 0; // fa align trick
+      margin-left: 1px; // fa align trick
     }
   }
 
@@ -59,9 +59,7 @@
       border-radius: 500px;
     }
   }
-
 }
-
 
 /* override for radio */
 .c-radio span {
@@ -82,8 +80,6 @@
     vertical-align: middle;
   }
 }
-
-
 
 
 /* Checked state */
@@ -124,56 +120,6 @@
       color: @ui-bg-color;
     }
   }
-}
-
-
-.c-radio.c-radio-nofont {
-  span {
-    &:before {
-      @sz: 10px;
-      content: "";
-      width: @sz; height: @sz;
-      top: 50%; left: 50%;
-      margin-top: -(@sz/2);
-      margin-left: -(@sz/2);
-      border-radius: 500px;
-      
-    }
-  }
-
-  input[type=radio]:checked + span:before{
-    color: #fff;
-    opacity: 1;
-    transition: color .3s ease-out;
-  }
-
-  input[type=radio]:checked + span {
-    border-color: @ui-fg-color;
-    background-color: @ui-fg-color;
-  }
-
-  /* override for radio */
-  input[type=radio]:checked + span{
-    background-color: #fff;
-    &:before{ 
-      background-color: @ui-fg-color;
-    }
-  }
-
-  /* Disable state */
-
-  input[type=radio]:disabled + span{
-    border-color: @ui-bg-color !important;
-    background-color: @ui-bg-color !important;
-  }
-  /* override for radio */
-  input[type=radio]:disabled + span {
-    background-color: #fff !important;
-    &:before {
-      background-color: @ui-bg-color;
-    }
-  }
-
 }
 
 //
@@ -276,7 +222,7 @@
   .form-control + .parsley-errors-list + & {
     right: 0;
     left: auto;
-    top: 10px;
+    // top: 10px;
   }
 
   .input-sm + &,
@@ -286,7 +232,7 @@
 
   label + .form-control + &,
   label + .form-control + .parsley-errors-list + & {
-    top: 36px;
+    // top: 36px;
   }
 
 }

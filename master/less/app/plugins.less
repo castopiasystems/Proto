@@ -1,4 +1,4 @@
-  /* ========================================================================
+/* ========================================================================
    Component: plugins.less
    - User this stylesheet to include single css styles and fixes 
      for plugins
@@ -15,11 +15,8 @@
 @slider-selection-bg: @slider-track-border;
 @slider-tooltip-color: #2c3037;
 
+body {
 
-// Seyria bootstrap slider
-
-.bs-slider {
-  display: inline-block;
   .slider-handle,
   .slider-track,
   .slider-selection {
@@ -56,11 +53,6 @@
     width: 380px;
   }
 
-}
-
-
-body {
-
   /**
    * Chosen
    */
@@ -71,7 +63,7 @@ body {
   @multiple-tag-bg: #f5f6f7;
 
   .chosen-container {
-    // width: 100% !important;
+    width: 100% !important;
     max-width: 100%;
   }
 
@@ -120,38 +112,18 @@ body {
   .chosen-container-multi .chosen-choices li.search-field input[type=text] {
     color: @input-color-placeholder;
   }
-  
-  /* Support for input groups */
-  
-  .input-group {
-    .chosen-container:last-child > a {
-      border-top-left-radius: 0;
-      border-bottom-left-radius: 0;
-    }
-    
-    select:first-child + .chosen-container > a {
-      border-top-right-radius: 0;
-      border-bottom-right-radius: 0;
-    }
-
-  }
 
   /**
    * Filestyle
    */
 
   .bootstrap-filestyle {
-    // max-width: 380px;
+    max-width: 380px;
   }
     
   // Made plugin responsive
-  [classyloader] {
+  [data-classyloader] {
     max-width: 100%;
-  }
-
-  // ui select
-  .ui-select-bootstrap .ui-select-toggle {
-    text-align: left;
   }
 
 } // body

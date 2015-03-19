@@ -14,12 +14,10 @@ var gulp        = require('gulp'),
     flip        = require('css-flip'),
     through     = require('through2'),
     gutil       = require('gulp-util'),
-    htmlify     = require('gulp-angular-htmlify'),
     minifyCSS   = require('gulp-minify-css'),
-    gulpFilter  = require('gulp-filter'),
+    filter      = require('gulp-filter'),
     expect      = require('gulp-expect-file'),
     gulpsync    = require('gulp-sync')(gulp),
-    ngAnnotate  = require('gulp-ng-annotate'),
     sourcemaps  = require('gulp-sourcemaps'),
     PluginError = gutil.PluginError;
 
@@ -27,21 +25,7 @@ var gulp        = require('gulp'),
 var lvr_port = 35729;
 
 var W3C_OPTIONS = {
-  // Set here your local validator if your using one. leave it empty if not
-  //uri: 'http://validator/check',
-  doctype: 'HTML5',
-  output: 'json',
-  // Remove some messages that angular will always display.
-  filter: function(message) {
-    if( /Element head is missing a required instance of child element title/.test(message) )
-      return false;
-    if( /Attribute .+ not allowed on element .+ at this point/.test(message) )
-      return false;
-    if( /Element .+ not allowed as child of element .+ in this context/.test(message) )
-      return false;
-    if(/Comments seen before doctype./.test(message))
-      return false;
-  }
+  doctype: 'HTML5'
 };
 
 // production mode (see build task)
@@ -52,14 +36,15 @@ var useSourceMaps = false;
 var hidden_files = '**/_*.*';
 var ignored_files = '!'+hidden_files;
 
+
 // VENDOR CONFIG
 var vendor = {
   // vendor scripts required to start the app
-  base: {
-    source: require('./vendor.base.json'),
-    dest: '../app/js',
-    name: 'base.js'
-  },
+  // base: {
+  //   source: require('./vendor.base.json'),
+  //   dest: '../app/js',
+  //   name: 'base.js'
+  // },
   // vendor scripts to make to app work. Usually via lazy loading
   app: {
     source: require('./vendor.json'),
@@ -72,21 +57,24 @@ var source = {
   scripts: {
     app:    [ 'js/app.init.js',
               'js/modules/*.js',
-              'js/modules/controllers/*.js',
-              'js/modules/directives/*.js',
-              'js/modules/services/*.js',
-              'js/modules/filters/*.js',
-              'js/custom/**/*.js'
+              'js/custom/**/*.js',
+              ignored_files
             ],
-    watch: ['js/**/*.js']
+    watch: ['js/**/*.js'],
+    demo: 'js/modules/demo/*.js'
   },
   templates: {
     app: {
         files : ['jade/index.jade'],
         watch: ['jade/index.jade', hidden_files]
     },
+    partials: {
+      layout: ['jade/_*.*'],
+      views: ['jade/views/**/_*.*'],
+      pages: ['jade/pages/**/_*.*']
+    },
     views: {
-        files : ['jade/views/*.jade', 'jade/views/**/*.jade', ignored_files],
+        files : ['jade/views/**/*.jade'],
         watch: ['jade/views/**/*.jade']
     },
     pages: {
@@ -119,13 +107,14 @@ var build = {
     app: {
       main: 'app.js',
       dir: '../app/js'
-    }
+    },
+    demo: '../app/js/demo'
   },
   styles: '../app/css',
   templates: {
     app: '..',
-    views: '../app/views',
-    pages: '../app/pages'
+    views: '../app/',
+    pages: '../app/'
   }
 };
 
@@ -142,7 +131,6 @@ gulp.task('scripts:app', function() {
     return gulp.src(source.scripts.app)
         .pipe( useSourceMaps ? sourcemaps.init() : gutil.noop())
         .pipe(concat(build.scripts.app.main))
-        .pipe(ngAnnotate())
         .on("error", handleError)
         .pipe( isProduction ? uglify({preserveComments:'some'}) : gutil.noop() )
         .on("error", handleError)
@@ -152,7 +140,7 @@ gulp.task('scripts:app', function() {
 
 
 // VENDOR BUILD
-gulp.task('scripts:vendor', ['scripts:vendor:base', 'scripts:vendor:app']);
+gulp.task('scripts:vendor', [/*'scripts:vendor:base',*/ 'scripts:vendor:app']);
 
 //  This will be included vendor files statically
 gulp.task('scripts:vendor:base', function() {
@@ -169,8 +157,8 @@ gulp.task('scripts:vendor:base', function() {
 // copy file from bower folder into the app vendor folder
 gulp.task('scripts:vendor:app', function() {
   
-  var jsFilter = gulpFilter('**/*.js');
-  var cssFilter = gulpFilter('**/*.css');
+  var jsFilter = filter('**/*.js');
+  var cssFilter = filter('**/*.css');
 
   return gulp.src(vendor.app.source, {base: 'bower_components'})
       .pipe(expect(vendor.app.source))
@@ -181,6 +169,15 @@ gulp.task('scripts:vendor:app', function() {
       .pipe(minifyCSS())
       .pipe(cssFilter.restore())
       .pipe( gulp.dest(vendor.app.dest) );
+
+});
+
+// SCRIPTS DEMO
+// copy file from demo folder into the app folder
+gulp.task('scripts:demo', function() {
+  
+  return gulp.src(source.scripts.demo)
+      .pipe( gulp.dest(build.scripts.demo) );
 
 });
 
@@ -235,29 +232,19 @@ gulp.task('bootstrap', function() {
         .pipe(gulp.dest(build.styles));
 });
 
-// JADE
-gulp.task('templates:app', function() {
-    return gulp.src(source.templates.app.files)
-        .pipe(changed(build.templates.app, { extension: '.html' }))
-        .pipe(jade())
-        .on("error", handleError)
-        .pipe(prettify({
-            indent_char: ' ',
-            indent_size: 3,
-            unformatted: ['a', 'sub', 'sup', 'b', 'i', 'u']
-        }))
-        // .pipe(htmlify({
-        //     customPrefixes: ['ui-']
-        // }))
-        // .pipe(w3cjs( W3C_OPTIONS ))
-        .pipe(gulp.dest(build.templates.app))
-        ;
-});
+// JADE PAGES
+gulp.task('templates:pages', templatePagesTask() );
+gulp.task('templates:pages:forced', templatePagesTask(true) );
 
-// JADE
-gulp.task('templates:pages', function() {
+// Generate tasks to compile pages templates
+// forced: doesn't take care of changed files
+function templatePagesTask(forced) {
+  return function() {
     return gulp.src(source.templates.pages.files)
-        .pipe(changed(build.templates.pages, { extension: '.html' }))
+        .pipe(forced ? gutil.noop() : changed(build.templates.pages, { extension: '.html' }))
+        .pipe(filter(function (file) {
+          return !/[\/\\]_/.test(file.path) && !/[\/\\]_/.test(file.relative) && !/^_/.test(file.relative);
+        }))
         .pipe(jade())
         .on("error", handleError)
         .pipe(prettify({
@@ -265,32 +252,42 @@ gulp.task('templates:pages', function() {
             indent_size: 3,
             unformatted: ['a', 'sub', 'sup', 'b', 'i', 'u']
         }))
-        // .pipe(htmlify({
-        //     customPrefixes: ['ui-']
-        // }))
         // .pipe(w3cjs( W3C_OPTIONS ))
         .pipe(gulp.dest(build.templates.pages))
         ;
-});
+      };
+}
 
-// JADE
-gulp.task('templates:views', function() {
+
+
+
+// JADE VIEWS
+gulp.task('templates:views', templatesViewTask() );
+gulp.task('templates:views:forced', templatesViewTask(true) );
+
+// Generate tasks to compile view templates
+// forced: doesn't take care of changed files
+function templatesViewTask(forced) {
+  return function() {
     return gulp.src(source.templates.views.files)
-        .pipe(changed(build.templates.views, { extension: '.html' }))
-        .pipe(jade())
+        .pipe(forced ? gutil.noop() : changed(build.templates.views, { extension: '.html' }))
+        .pipe(filter(function (file) {
+          return !/[\/\\]_/.test(file.path) && !/[\/\\]_/.test(file.relative) && !/^_/.test(file.relative);
+        }))
+        .pipe(jade({
+          locals: require('./sidebar.json')
+        }))
         .on("error", handleError)
         .pipe(prettify({
             indent_char: ' ',
             indent_size: 3,
             unformatted: ['a', 'sub', 'sup', 'b', 'i', 'u']
         }))
-        // .pipe(htmlify({
-        //     customPrefixes: ['ui-']
-        // }))
         // .pipe(w3cjs( W3C_OPTIONS ))
         .pipe(gulp.dest(build.templates.views))
         ;
-});
+      };
+}
 
 //---------------
 // WATCH
@@ -300,13 +297,16 @@ gulp.task('templates:views', function() {
 gulp.task('watch', function() {
   livereload.listen();
 
-  gulp.watch(source.scripts.watch,           ['scripts:app']);
-  gulp.watch(source.styles.app.watch,        ['styles:app', 'styles:app:rtl']);
-  gulp.watch(source.styles.themes.watch,     ['styles:themes']);
-  gulp.watch(source.bootstrap.watch,         ['styles:app']); //bootstrap
-  gulp.watch(source.templates.pages.watch,   ['templates:pages']);
-  gulp.watch(source.templates.views.watch,   ['templates:views']);
-  gulp.watch(source.templates.app.watch,     ['templates:app']);
+  gulp.watch(source.scripts.watch,            ['scripts:app', 'scripts:demo']);
+  gulp.watch(source.styles.app.watch,         ['styles:app', 'styles:app:rtl']);
+  gulp.watch(source.styles.themes.watch,      ['styles:themes']);
+  gulp.watch(source.bootstrap.watch,          ['styles:app']);
+  gulp.watch(source.templates.pages.watch,    ['templates:pages']);
+  gulp.watch(source.templates.views.watch,    ['templates:views']);
+  // Jade partials
+  gulp.watch(source.templates.partials.layout, ['templates:views:forced', 'templates:pages:forced']);
+  gulp.watch(source.templates.partials.views,  ['templates:views:forced']);
+  gulp.watch(source.templates.partials.pages,  ['templates:pages:forced']);
 
   gulp.watch([
 
@@ -325,19 +325,26 @@ gulp.task('watch', function() {
 // DEFAULT TASK
 //---------------
 
-
 // build for production (minify)
 gulp.task('build', ['prod', 'default']);
 gulp.task('prod', function() { isProduction = true; });
-
 // build with sourcemaps (no minify)
 gulp.task('sourcemaps', ['usesources', 'default']);
 gulp.task('usesources', function(){ useSourceMaps = true; });
-
 // default (no minify)
+gulp.task('start',[
+          'styles:app',
+          'styles:app:rtl',
+          'styles:themes',
+          'templates:pages',
+          'templates:views',
+          'watch'
+        ]);
+
 gulp.task('default', gulpsync.sync([
           'scripts:vendor',
           'scripts:app',
+          'scripts:demo',
           'start'
         ]), function(){
 
@@ -345,20 +352,6 @@ gulp.task('default', gulpsync.sync([
   gutil.log(gutil.colors.cyan('* All Done *'), 'You can start editing your code, LiveReload will update your browser after any change..');
   gutil.log(gutil.colors.cyan('************'));
 
-});
-
-gulp.task('start',[
-          'styles:app',
-          'styles:app:rtl',
-          'styles:themes',
-          'templates:app',
-          'templates:pages',
-          'templates:views',
-          'watch'
-        ]);
-
-gulp.task('done', function(){
-  console.log('All Done!! You can start editing your code, LiveReload will update your browser after any change..');
 });
 
 // Error handler

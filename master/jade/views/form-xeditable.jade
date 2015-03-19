@@ -1,108 +1,100 @@
-h3 Form xEditable
-  small Edit in place for AngularJS
+extends ../_layout
 
-.row(ng-controller='FormxEditableController')
-  .col-md-6
-    .panel.panel-default
-      .panel-heading HTML5 Inputs
-      .panel-body
-        .form-horizontal
-          .form-group.m0
-            label.col-sm-4.control-label Email: 
-            .col-sm-8
-              p.form-control-static
-                a(href='#', editable-email='user.email') {{ user.email || &apos;empty&apos; }}
-          .form-group.m0
-            label.col-sm-4.control-label Tel: 
-            .col-sm-8
-              p.form-control-static
-                a(href='#', editable-tel='user.tel', e-pattern='\\d{3}\-\\d{2}\-\\d{2}', e-title='xxx-xx-xx') {{ user.tel || &apos;empty&apos; }}
-          .form-group.m0
-            label.col-sm-4.control-label Number: 
-            .col-sm-8
-              p.form-control-static
-                a(href='#', editable-number='user.number', e-min='18') {{ user.number || &apos;empty&apos; }}
-          .form-group.m0
-            label.col-sm-4.control-label Range: 
-            .col-sm-8
-              p.form-control-static
-                a(href='#', editable-range='user.range', e-step='5') {{ user.range || &apos;empty&apos; }}
+block active
+  - sidebar_active = 'form-wizard.html'
 
-          .form-group.m0
-            label.col-sm-4.control-label Url: 
-            .col-sm-8
-              p.form-control-static
-                a(href='#', editable-url='user.url') {{ user.url || &apos;empty&apos; }}
+block content
+  h3 X-Editable
+    small In-place editing
 
-          .form-group.m0
-            label.col-sm-4.control-label Search: 
-            .col-sm-8
-              p.form-control-static
-                a(href='#', editable-search='user.search') {{ user.search || &apos;empty&apos; }}
+  .clearfix.mb-lg
+    .pull-left
+      button#enable.btn.btn-default enable / disable
+    .pull-right
+      .checkbox.c-checkbox
+        label
+          input#autoopen(type='checkbox')
+          span.fa.fa-check
+          |  auto-open next field
 
-          .form-group.m0
-            label.col-sm-4.control-label Color: 
-            .col-sm-8
-              p.form-control-static
-                a(href='#', editable-color='user.color') {{ user.color || &apos;empty&apos; }}
+  .panel
+    .panel-heading Editable inputs
+    table#user.table.table-bordered.table-striped(style='clear: both')
+      tbody
+        tr
+          td(width='35%') Simple text field
+          td(width='65%')
+            a#username(href='#', data-type='text', data-pk='1', data-title='Enter username') superuser
+        tr
+          td Empty text field, required
+          td
+            a#firstname(href='#', data-type='text', data-pk='1', data-placement='right', data-placeholder='Required', data-title='Enter your firstname')
+        tr
+          td Select, local array, custom display
+          td
+            a#sex(href='#', data-type='select', data-pk='1', data-value='', data-title='Select sex')
+        tr
+          td Select, remote array, no buttons
+          td
+            a#group(href='#', data-type='select', data-pk='1', data-value='5', data-source='../server/xeditable-groups.json', data-title='Select group') Admin
+        tr
+          td Select, error while loading
+          td
+            a#status(href='#', data-type='select', data-pk='1', data-value='0', data-source='/status', data-title='Select status') Active
+        tr
+          td Combodate (date)
+          td
+            a#dob(href='#', data-type='combodate', data-value='1984-05-15', data-format='YYYY-MM-DD', data-viewformat='DD/MM/YYYY', data-template='D / MMM / YYYY', data-pk='1', data-title='Select Date of birth')
+        tr
+          td Combodate (datetime)
+          td
+            a#event(href='#', data-type='combodate', data-template='D MMM YYYY  HH:mm', data-format='YYYY-MM-DD HH:mm', data-viewformat='MMM D, YYYY, HH:mm', data-pk='1', data-title='Setup event date and time')
+        tr
+          td
+            | Textarea, buttons below. Submit by 
+            i ctrl+enter
+          td
+            a#comments(href='#', data-type='textarea', data-pk='1', data-placeholder='Your comments here...', data-title='Enter comments') awesomeuser!
+        tr
+          td Checklist
+          td
+            a#fruits(href='#', data-type='checklist', data-value='2,3', data-title='Select fruits')
+  
+  .panel
+    .panel-heading Editable table
+    table#users.table.table-bordered.table-condensed
+      tr
+        th #
+        th name
+        th age
+      tr
+        td 1
+        td
+          a(href='#', data-pk='1') Mike
+        td 
+          a(href='#', data-pk='1') 21
+      tr
+        td 2
+        td
+          a(href='#', data-pk='2') John
+        td 
+          a(href='#', data-pk='2') 28
+      tr
+        td 3
+        td
+          a(href='#', data-pk='3') Mary
+        td 
+          a(href='#', data-pk='3') 24
 
-          .form-group.m0
-            label.col-sm-4.control-label Date: 
-            .col-sm-8
-              p.form-control-static
-                a(href='#', editable-date='user.date') {{ user.date || &apos;empty&apos; }}
 
-          .form-group.m0
-            label.col-sm-4.control-label Time: 
-            .col-sm-8
-              p.form-control-static
-                a(href='#', editable-time='user.time') {{ user.time || &apos;empty&apos; }}
 
-          .form-group.m0
-            label.col-sm-4.control-label Datetime: 
-            .col-sm-8
-              p.form-control-static
-                a(href='#', editable-datetime='user.datetime') {{ user.datetime || &apos;empty&apos; }}
-
-          .form-group.m0
-            label.col-sm-4.control-label Month: 
-            .col-sm-8
-              p.form-control-static
-                a(href='#', editable-month='user.month') {{ user.month || &apos;empty&apos; }}
-
-          .form-group.m0
-            label.col-sm-4.control-label Week: 
-            .col-sm-8
-              p.form-control-static
-                a(href='#', editable-week='user.week') {{ user.week || &apos;empty&apos; }}
-  .col-md-6
-    .panel.panel-default
-      .panel-heading Controls
-      .panel-body
-        .form-horizontal
-          .form-group.m0
-            label.col-sm-4.control-label Text
-            .col-sm-8
-              p.form-control-static
-                a(href='#', editable-text='user.name') {{ user.name || &apos;empty&apos; }}
-          .form-group.m0
-            label.col-sm-4.control-label Local Select
-            .col-sm-8
-              p.form-control-static
-                a(href='#', editable-select='user2.status', e-ng-options='s.value as s.text for s in statuses') {{ showStatus() }}
-          .form-group.m0
-            label.col-sm-4.control-label Remote Select
-            .col-sm-8
-              p.form-control-static
-                a(href='#', editable-select='user3.text', ng-init='loadGroups()', e-ng-options='g.text as g.text for g in groups') {{ user3.text || &apos;not set&apos; }}  
-          .form-group.m0
-            label.col-sm-4.control-label Textarea
-            .col-sm-8
-              p.form-control-static
-                a(href='#', editable-textarea='user.desc', e-rows='3', e-cols='30') {{ user.desc || 'no description' }}    
-          .form-group.m0
-            label.col-sm-4.control-label Typeahead
-            .col-sm-8
-              p.form-control-static
-                a(href='#', editable-text='user4.state', e-typeahead='state for state in states | filter:$viewValue | limitTo:8') {{ user4.state || &apos;empty&apos; }}  
-
+block vendor_css
+  // XEDITABLE
+  link(rel='stylesheet', href='../vendor/x-editable/dist/bootstrap3-editable/css/bootstrap-editable.css')  
+block vendor_js
+  // XEDITABLE
+  script(src="../vendor/x-editable/dist/bootstrap3-editable/js/bootstrap-editable.min.js")
+  // MOMENT JS
+  script(src='../vendor/moment/min/moment-with-locales.min.js')
+  // DEMO
+  script(src='js/demo/demo-xeditable.js')

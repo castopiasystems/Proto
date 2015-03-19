@@ -156,21 +156,6 @@ body {
     color: $input-color-placeholder;
   }
 
-  /* Support for input groups */
-  
-  .input-group {
-    .chosen-container:last-child > a {
-      border-top-left-radius: 0;
-      border-bottom-left-radius: 0;
-    }
-    
-    select:first-child + .chosen-container > a {
-      border-top-right-radius: 0;
-      border-bottom-right-radius: 0;
-    }
-
-  }
-
   /**
    * Filestyle
    */
@@ -182,11 +167,6 @@ body {
   // Made plugin responsive
   [data-classyloader] {
     max-width: 100%;
-  }
-
-  // ui select
-  .ui-select-bootstrap .ui-select-toggle {
-    text-align: left;
   }
 
 } // body

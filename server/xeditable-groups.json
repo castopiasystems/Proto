@@ -1,13 +1,19 @@
 [{
-  "id": 1,
-  "text": "user"
+  "value": "0",
+  "text": "Guest"
 }, {
-  "id": 2,
-  "text": "customer"
+  "value": "1",
+  "text": "Service"
 }, {
-  "id": 3,
-  "text": "vip"
+  "value": "2",
+  "text": "Customer"
 }, {
-  "id": 4,
-  "text": "admin"
+  "value": "3",
+  "text": "Operator"
+}, {
+  "value": "4",
+  "text": "Support"
+}, {
+  "value": "5",
+  "text": "Admin"
 }]

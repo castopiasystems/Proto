@@ -88,9 +88,10 @@ html, body {
       overflow: auto;
     }
 
-    .dropdown-backdrop {
-      z-index: -1;
-    }
+  }
+
+  .dropdown-backdrop {
+    z-index: $z-index-main-section - 2;
   }
 
   // Contains the main content

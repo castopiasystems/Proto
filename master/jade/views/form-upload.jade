@@ -1,78 +1,156 @@
-h3 Form Upload
-  small Powerfull upload module
+extends ../_layout
 
-div(ng-controller='FileUploadController', nv-file-drop='', uploader='uploader', filters='queueLimit, customFilter')
-  .container-fluid
-    .row
-      .col-md-3
-        .panel
-          .panel-body
-            h4.page-header.mt0 Select files
-            div(ng-show='uploader.isHTML5')
-              // 3. nv-file-over uploader="link" over-class="className"
-              .box-placeholder.my-drop-zone(nv-file-over='', uploader='uploader',over-class='bg-info') Base drop zone                        
-              // Example: nv-file-drop="" uploader="{Object}" options="{Object}" filters="{String}"
-              div(nv-file-drop='', uploader='uploader', options="{ url: '/foo' }")
-                .box-placeholder.my-drop-zone(nv-file-over='', uploader='uploader', over-class='bg-purple')
-                  | Another drop zone with its own settings
-            // Example: nv-file-select="" uploader="{Object}" options="{Object}" filters="{String}"
-            hr
-            input.form-control(filestyle="", type='file', data-button-text="Multiple", data-class-button='btn btn-default', data-class-input="form-control inline", nv-file-select='', uploader='uploader', multiple='')
-            br
-            input.form-control(filestyle="", type='file', data-button-text="Single", data-class-button='btn btn-default', data-classinput="form-control inline", nv-file-select='', uploader='uploader')
-      .col-md-9(style='margin-bottom: 40px')
-        .panel
-          .panel-body
-            p.pull-right.label.label-info(ng-if="uploader.queue.length") Queue length: {{ uploader.queue.length }}
-            h4.page-header.mt0 Upload queue
-            p.lead.text-center(ng-if="!uploader.queue.length") No files in queue. Start adding some..
-            div(ng-if="uploader.queue.length")
-              
-              table.table(ng-if="uploader.queue.length")
-                thead
-                  tr
-                    th(width='50%') Name
-                    th(ng-show='uploader.isHTML5') Size
-                    th(ng-show='uploader.isHTML5') Progress
-                    th Status
-                    th Actions
-                tbody
-                  tr(ng-repeat='item in uploader.queue')
-                    td
-                      strong {{ item.file.name }}
-                    td(ng-show='uploader.isHTML5', nowrap='') {{ item.file.size/1024/1024|number:2 }} MB
-                    td(ng-show='uploader.isHTML5')
-                      .progress.progress-xs(style='margin-bottom: 0;')
-                        .progress-bar(role='progressbar', ng-style="{ 'width': item.progress + '%' }")
-                    td.text-center
-                      span(ng-show='item.isSuccess')
-                        em.fa.fa-check.fa-fw
-                      span(ng-show='item.isCancel')
-                        em.fa.fa-ban-circle.fa-fw
-                      span(ng-show='item.isError')
-                        em.fa.fa-times.fa-fw
-                    td(nowrap='')
-                      button.btn.btn-info.btn-xs(type='button', ng-click='item.upload()', ng-disabled='item.isReady || item.isUploading || item.isSuccess')
-                        span.icon-cloud-upload.mr
-                        |  Upload
-                      button.btn.btn-warning.btn-xs(type='button', ng-click='item.cancel()', ng-disabled='!item.isUploading')
-                        span.icon-close.mr
-                        |  Cancel
-                      button.btn.btn-danger.btn-xs(type='button', ng-click='item.remove()')
-                        span.icon-trash.mr
-                        |  Remove
-        .panel
-          .panel-body
-            div
-              p Queue progress:
-              .progress.progress-xs(style='')
-                .progress-bar(role='progressbar', ng-style="{ 'width': uploader.progress + '%' }")
-            button.btn.btn-info.btn-s(type='button', ng-click='uploader.uploadAll()', ng-disabled='!uploader.getNotUploadedItems().length')
-              span.icon-cloud-upload.mr
-              |  Upload all
-            button.btn.btn-warning.btn-s(type='button', ng-click='uploader.cancelAll()', ng-disabled='!uploader.isUploading')
-              span.icon-close.mr
-              |  Cancel all
-            button.btn.btn-danger.btn-s(type='button', ng-click='uploader.clearQueue()', ng-disabled='!uploader.queue.length')
-              span.icon-trash.mr
-              |  Remove all
+block active
+  - sidebar_active = 'form-upload.html'
+
+block content
+  h3 File Upload
+  blockquote.box-placeholder
+    p
+      | File Upload widget with multiple file selection, drag&amp;drop support, progress bars, validation and preview images, audio and video for jQuery.
+      br
+      | Supports cross-domain, chunked and resumable file uploads and client-side image resizing.
+      br
+      | Works with any server-side platform (PHP, Python, Ruby on Rails, Java, Node.js, Go etc.) that supports standard HTML form file uploads.
+  br
+  // The file upload form used as target for the file upload widget
+  form#fileupload(action='//jquery-file-upload.appspot.com/', method='POST', enctype='multipart/form-data')
+    // Redirect browsers with JavaScript disabled to the origin page
+    noscript
+      input(type='hidden', name='redirect', value='https://blueimp.github.io/jQuery-File-Upload/')
+    // The fileupload-buttonbar contains buttons to add/delete files and start/cancel the upload
+    .row.fileupload-buttonbar
+      .col-lg-7
+        // The fileinput-button span is used to style the file input field as button
+        span.btn.btn-success.fileinput-button
+          i.fa.fa-fw.fa-plus
+          span Add files...
+          input(type='file', name='files[]', multiple='')
+        button.btn.btn-primary.start(type='submit')
+          i.fa.fa-fw.fa-upload
+          span Start upload
+        button.btn.btn-warning.cancel(type='reset')
+          i.fa.fa-fw.fa-times
+          span Cancel upload
+        button.btn.btn-danger.delete(type='button')
+          i.fa.fa-fw.fa-trash
+          span Delete
+        // The global file processing state
+        span.fileupload-process
+      // The global progress state
+      .col-lg-5.fileupload-progress.fade
+        // The global progress bar
+        .progress.progress-striped.active(role='progressbar', aria-valuemin='0', aria-valuemax='100')
+          .progress-bar.progress-bar-success(style='width:0%;')
+        // The extended global progress state
+        .progress-extended &nbsp;
+    // The table listing the files available for upload/download
+    table.table.table-striped(role='presentation')
+      tbody.files
+
+  // The template to display files available for upload
+  script#template-upload(type='text/x-tmpl').
+    {% for (var i=0, file; file=o.files[i]; i++) { %}
+        <tr class="template-upload fade">
+            <td>
+                <span class="preview"></span>
+            </td>
+            <td>
+                <p class="name">{%=file.name%}</p>
+                <strong class="error text-danger"></strong>
+            </td>
+            <td>
+                <p class="size">Processing...</p>
+                <div class="progress progress-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div class="progress-bar progress-bar-success" style="width:0%;"></div></div>
+            </td>
+            <td>
+                {% if (!i && !o.options.autoUpload) { %}
+                    <button class="btn btn-primary start" disabled>
+                        <em class="fa fa-fw fa-upload"></em>
+                        <span>Start</span>
+                    </button>
+                {% } %}
+                {% if (!i) { %}
+                    <button class="btn btn-warning cancel">
+                        <em class="fa fa-fw fa-times"></em>
+                        <span>Cancel</span>
+                    </button>
+                {% } %}
+            </td>
+        </tr>
+    {% } %}
+
+  // The template to display files available for download
+  script#template-download(type='text/x-tmpl').
+    {% for (var i=0, file; file=o.files[i]; i++) { %}
+        <tr class="template-download fade">
+            <td>
+                <span class="preview">
+                    {% if (file.thumbnailUrl) { %}
+                        <a href="{%=file.url%}" title="{%=file.name%}" download="{%=file.name%}" data-gallery><img src="{%=file.thumbnailUrl%}"></a>
+                    {% } %}
+                </span>
+            </td>
+            <td>
+                <p class="name">
+                    {% if (file.url) { %}
+                        <a href="{%=file.url%}" title="{%=file.name%}" download="{%=file.name%}" {%=file.thumbnailUrl?'data-gallery':''%}>{%=file.name%}</a>
+                    {% } else { %}
+                        <span>{%=file.name%}</span>
+                    {% } %}
+                </p>
+                {% if (file.error) { %}
+                    <div><span class="label label-danger">Error</span> {%=file.error%}</div>
+                {% } %}
+            </td>
+            <td>
+                <span class="size">{%=o.formatFileSize(file.size)%}</span>
+            </td>
+            <td>
+                {% if (file.deleteUrl) { %}
+                    <button class="btn btn-danger delete" data-type="{%=file.deleteType%}" data-url="{%=file.deleteUrl%}"{% if (file.deleteWithCredentials) { %} data-xhr-fields='{"withCredentials":true}'{% } %}>
+                        <em class="fa fa-fw fa-trash"></em>
+                        <span>Delete</span>
+                    </button>
+                {% } else { %}
+                    <button class="btn btn-warning cancel">
+                        <em class="fa fa-fw fa-times"></em>
+                        <span>Cancel</span>
+                    </button>
+                {% } %}
+            </td>
+        </tr>
+    {% } %}
+
+
+block vendor_css
+  // CSS to style the file input field as button and adjust the Bootstrap progress bars
+  link(rel='stylesheet', href='../vendor/blueimp-file-upload/css/jquery.fileupload.css')
+block vendor_js
+  // The jQuery UI widget factory, can be omitted if jQuery UI is already included
+  script(src='../vendor/jquery-ui/ui/widget.js')
+  // The Templates plugin is included to render the upload/download listings
+  script(src='../vendor/blueimp-tmpl/js/tmpl.js')
+  // The Load Image plugin is included for the preview images and image resizing functionality
+  script(src='../vendor/blueimp-load-image/js/load-image.all.min.js')
+  // The Canvas to Blob plugin is included for image resizing functionality
+  script(src='../vendor/blueimp-canvas-to-blob/js/canvas-to-blob.js')
+  // The Iframe Transport is required for browsers without support for XHR file uploads
+  script(src='../vendor/blueimp-file-upload/js/jquery.iframe-transport.js')
+  // The basic File Upload plugin
+  script(src='../vendor/blueimp-file-upload/js/jquery.fileupload.js')
+  // The File Upload processing plugin
+  script(src='../vendor/blueimp-file-upload/js/jquery.fileupload-process.js')
+  // The File Upload image preview & resize plugin
+  script(src='../vendor/blueimp-file-upload/js/jquery.fileupload-image.js')
+  // The File Upload audio preview plugin
+  script(src='../vendor/blueimp-file-upload/js/jquery.fileupload-audio.js')
+  // The File Upload video preview plugin
+  script(src='../vendor/blueimp-file-upload/js/jquery.fileupload-video.js')
+  // The File Upload validation plugin
+  script(src='../vendor/blueimp-file-upload/js/jquery.fileupload-validate.js')
+  // The File Upload user interface plugin
+  script(src='../vendor/blueimp-file-upload/js/jquery.fileupload-ui.js')
+  // Demo
+  script(src='js/demo/demo-upload.js')
+
